@@ -1,0 +1,10 @@
+# produits de compilation
+*.dll
+!lib/NAudio.dll
+*.pdb
+
+# journaux, ecrits en jeu
+*.log
+
+# reglages locaux : le fichier livre est dans config/
+scripts/
