@@ -217,7 +217,7 @@ namespace WorldRadio
 
             //  gain = coupe ? 0 : volume musique du jeu x proportion x attenuation
             //  Aucun autre multiplicateur ailleurs dans le mod.
-            float plein = _volumeJeu * _proportion;
+            float plein = _volumeJeu * _proportion * _gainStation;
             float voulu = couper ? 0f : plein * (baisser ? _attenuation : 1f);
             if (_volumeJeu <= 0f) voulu = 0f;       // zero exact, aucun residu
             _gainCible = voulu;
@@ -337,6 +337,18 @@ namespace WorldRadio
                 case RaisonVehicule: return 420;
                 default: return 320;
             }
+        }
+
+        /// <summary>
+        /// Correction de niveau de la station en cours, deja convertie en
+        /// facteur lineaire. Elle entre dans LE calcul de gain, comme le reste :
+        /// pas de second etage de volume ailleurs dans le mod.
+        /// </summary>
+        private float _gainStation = 1f;
+
+        internal void DefinirGainStation(double db)
+        {
+            _gainStation = (float)Math.Pow(10.0, db / 20.0);
         }
 
         /// <summary>

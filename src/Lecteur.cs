@@ -226,7 +226,8 @@ namespace WorldRadio
                 // Chaine audio, le gain AVANT le peripherique de sortie :
                 //
                 //   HTTP -> MediaFoundationReader -> ISampleProvider
-                //        -> VolumeSampleProvider  -> WasapiOut
+                //        -> SondeSpectre -> VolumeSampleProvider
+                //        -> Limiteur     -> WasapiOut
                 //
                 // Le gain multiplie donc reellement les echantillons. Ecrire
                 // dans IWavePlayer.Volume agirait au contraire sur le
@@ -242,8 +243,12 @@ namespace WorldRadio
                 VolumeSampleProvider attenuateur = new VolumeSampleProvider(sonde);
                 attenuateur.Volume = _gain;
 
+                // Le limiteur vient APRES le gain : c'est le signal final qu'il
+                // doit surveiller, celui qui sortira reellement.
+                ISampleProvider garde = new Limiteur(attenuateur);
+
                 IWavePlayer sortie = CreerSortie();
-                sortie.Init(attenuateur);
+                sortie.Init(garde);
 
                 // On ne lance le son QU'APRES s'etre assure d'etre encore la
                 // demande courante, et une fois la reference enregistree. Un

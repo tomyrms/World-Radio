@@ -429,6 +429,10 @@ namespace WorldRadio
             // plein volume : c'est le controleur qui mene le fondu.
             _audio.Fondre();
 
+            // Chaque station a sa correction de niveau. Appliquee pendant le
+            // fondu, elle ne s'entend pas comme un saut.
+            if (s != null) _audio.DefinirGainStation(s.GainDb);
+
             if (s == null)
             {
                 _lecteur.Arreter();

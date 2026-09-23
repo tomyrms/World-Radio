@@ -21,6 +21,7 @@ $sources = @(
     (Join-Path $src 'Ecran.cs'),
     (Join-Path $src 'Dessin.cs'),
     (Join-Path $src 'Spectre.cs'),
+    (Join-Path $src 'Limiteur.cs'),
     (Join-Path $src 'Selecteur.cs'),
     (Join-Path $src 'Apercu.cs'),
     (Join-Path $src 'WorldRadio.cs')

@@ -8,3 +8,7 @@
 
 # reglages locaux : le fichier livre est dans config/
 scripts/
+
+# outil de mesure : compile a la demande
+outils/*.exe
+outils/NAudio.dll

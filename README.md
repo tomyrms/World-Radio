@@ -60,6 +60,41 @@ Pendant le menu pause, GTA gèle le fil des scripts : un mod gelé ne peut pas
 baisser son propre volume. Un chien de garde tourne donc sur son propre fil et
 coupe après 260 ms sans signe de vie du jeu.
 
+## Le même niveau pour toutes les stations
+
+Les radios ne sont pas masterisées au même niveau. Mesure faite selon
+ITU-R BS.1770 — la norme des diffuseurs — 11 LU séparaient la plus forte de la
+plus faible : Skyrock sortait **quatre fois plus fort** que HOT 97 à l'oreille.
+
+Chaque station porte donc une correction `Gain=` dans le `.ini`, qui la ramène à
+**−14 LUFS**, le niveau de référence de Spotify et YouTube. Les valeurs viennent
+de quatre à huit minutes d'écoute par station, moyennées en énergie comme le
+fait la norme.
+
+| | Avant | Après |
+|---|---|---|
+| Écart entre stations | 10,7 LU | 2,7 LU |
+| Niveau moyen | — | −14,08 LUFS |
+| Crête la plus haute | 0,00 dBFS | −1,00 dBFS |
+
+L'écart restant vient du contenu : sur une même station, un flash info est plus
+calme qu'un morceau. Une correction fixe par station ne peut pas l'effacer, et
+ne le doit pas.
+
+Remonter les stations faibles les ferait saturer : un **limiteur** à −1 dBFS
+termine la chaîne. Il ne rabat que ce qui dépasse, et laisse passer le reste
+à l'identique, échantillon pour échantillon.
+
+Pour mesurer une station ajoutée :
+
+```powershell
+.\outils\mesurer.ps1            # niveau brut, avec le Gain= conseillé
+.\outils\mesurer.ps1 -Apres     # à travers la chaîne corrigée du mod
+```
+
+L'outil a été vérifié sur un signal de référence : une sinusoïde à 997 Hz,
+crête à −20 dBFS, mesure exactement −20,00 LUFS à 48 kHz comme à 44,1 kHz.
+
 ## Compiler
 
 ```powershell
@@ -82,6 +117,9 @@ Copie le DLL, la configuration, NAudio et les 24 images dans `scripts\`. Les
 réglages personnels d'une installation précédente sont conservés : volume,
 dernière station, touches, hauteur de l'encart.
 
+Une ancienne installation sous le nom **Radio Libre** est mise de côté, et ses
+réglages sont repris. Laisser les deux ferait jouer deux radios à la fois.
+
 ## Tester
 
 ```powershell
@@ -89,6 +127,7 @@ dernière station, touches, hauteur de l'encart.
 .\tests\roue.ps1        # visée angulaire, proportions des logos, sélection
 .\tests\fondu.ps1       # les dix causes de coupure, les rampes, le chien de garde
 .\tests\spectre.ps1     # analyse de fréquence sur un flux réel
+.\tests\niveau.ps1      # corrections de niveau, et limiteur
 ```
 
 Ces tests ne vérifient pas que le code compile, mais qu'il fait ce qu'il
@@ -103,6 +142,7 @@ src/
   Audio.cs          SEULE autorité du volume
   Lecteur.cs        flux réseau, un ouvrier unique
   Spectre.cs        niveaux par transformée de Fourier
+  Limiteur.cs       garde-fou contre la saturation, en bout de chaîne
   Menu.cs           état de la roue, visée angulaire
   Selecteur.cs      rendu de la roue
   Apercu.cs         encart en bas à droite

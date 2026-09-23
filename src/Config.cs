@@ -28,6 +28,14 @@ namespace WorldRadio
 
         /// <summary>Position dans la liste plate, qui sert d'identifiant stable.</summary>
         public int Index;
+
+        /// <summary>
+        /// Correction de niveau, en decibels, pour que toutes les stations
+        /// sonnent aussi fort. Les radios ne sont pas masterisees au meme
+        /// niveau : mesure faite, Skyrock sort 11 LU plus fort que HOT 97,
+        /// soit quatre fois plus fort a l'oreille.
+        /// </summary>
+        public double GainDb;
     }
 
     /// <summary>
@@ -263,6 +271,13 @@ namespace WorldRadio
             s.Icone = Lire(d, "Icon", "");
             s.NomPays = Lire(d, "Country", "");
             s.IdMeta  = Lire(d, "MetadataId", "");
+
+            // Borne : au-dela de +6 dB, une erreur de mesure deviendrait une
+            // saturation ; en-deca de -24 dB, la station serait inaudible.
+            double gain;
+            if (double.TryParse(Lire(d, "Gain", "0"), NumberStyles.Float,
+                                CultureInfo.InvariantCulture, out gain))
+                s.GainDb = Math.Max(-24.0, Math.Min(6.0, gain));
 
             string mode = Lire(d, "Metadata", "Icy");
             if (mode.Equals("Triton", StringComparison.OrdinalIgnoreCase)) s.Source = SourceMeta.Triton;

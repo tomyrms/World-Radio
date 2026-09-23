@@ -9,8 +9,20 @@ Write-Host ''
 Write-Host '=== World Radio : installation ===' -ForegroundColor Cyan
 
 # --- attendre la fermeture du jeu : les DLL chargees sont verrouillees ---
+# Seulement celui qui tourne DEPUIS CE DOSSIER : une autre installation de
+# GTA ouverte ailleurs ne verrouille rien ici.
+$racine = (Resolve-Path -LiteralPath $G).Path.TrimEnd([char]92)
+function Jeu-Ouvert {
+    foreach ($p in (Get-Process -Name GTA5, GTA5_Enhanced -ErrorAction SilentlyContinue)) {
+        $ch = $null
+        try { $ch = $p.Path } catch { }
+        # chemin illisible : dans le doute, on attend plutot que de corrompre
+        if (-not $ch -or $ch.StartsWith($racine, [StringComparison]::OrdinalIgnoreCase)) { return $true }
+    }
+    return $false
+}
 $attente = 0
-while (Get-Process -Name GTA5, GTA5_Enhanced -ErrorAction SilentlyContinue) {
+while (Jeu-Ouvert) {
     if ($attente -eq 0) {
         Write-Host ''
         Write-Host 'GTA V tourne encore. Ferme le jeu, l installation part toute seule.' -ForegroundColor Yellow
@@ -33,7 +45,10 @@ $aDeplacer = @(
     'LeonidaFM',
     'VIRadioOnly.dll', 'VIRadioOnly.ini', 'VIRadioOnly',
     'StreamFM.ini', 'StreamFM.log', 'StreamFM.cs.remplace_par_dll', 'StreamFM',
-    'StreamFM.cs'
+    'StreamFM.cs',
+    # World Radio s'appelait Radio Libre : laisser les deux, ce serait deux
+    # radios qui jouent en meme temps
+    'RadioLibre.dll', 'RadioLibre.ini', 'RadioLibre.log', 'RadioLibre'
 )
 
 $deplaces = 0
@@ -70,8 +85,14 @@ $aPreserver = @('Volume', 'LastStation', 'MuteKey', 'VolumeUpKey', 'VolumeDownKe
                 'InvertMenuAxis', 'AudioLog', 'NowPlayingRaise', 'WheelSlowMotion', 'DuckDuringDialogue', 'DuckOnAmbientSpeech')
 $personnels = @{}
 $iniJeu = Join-Path $sc 'WorldRadio.ini'
-if (Test-Path -LiteralPath $iniJeu) {
-    foreach ($ligne in Get-Content -LiteralPath $iniJeu) {
+
+# Premiere installation sous ce nom : les reglages sont ceux de Radio Libre,
+# que l'etape precedente vient de mettre de cote.
+$iniSource = $iniJeu
+if (-not (Test-Path -LiteralPath $iniSource)) { $iniSource = Join-Path $sauve 'RadioLibre.ini' }
+if (Test-Path -LiteralPath $iniSource) {
+    if ($iniSource -ne $iniJeu) { Write-Host '  reglages repris de Radio Libre' -ForegroundColor Yellow }
+    foreach ($ligne in Get-Content -LiteralPath $iniSource) {
         $l = $ligne.Trim()
         if ($l.Length -eq 0 -or $l[0] -eq ';' -or $l[0] -eq '#') { continue }
         $eq = $l.IndexOf('=')
@@ -81,10 +102,13 @@ if (Test-Path -LiteralPath $iniJeu) {
     }
 }
 
+if (-not (Test-Path -LiteralPath (Join-Path $W 'WorldRadio.dll'))) {
+    throw 'WorldRadio.dll introuvable : lance d abord build\compile.ps1'
+}
 $copies = @(
-    @{ de = (Join-Path $src 'WorldRadio.dll'); vers = (Join-Path $sc 'WorldRadio.dll') },
-    @{ de = (Join-Path $src 'WorldRadio.ini'); vers = (Join-Path $sc 'WorldRadio.ini') },
-    @{ de = (Join-Path $W  'naudio\NAudio.dll'); vers = (Join-Path $sc 'NAudio.dll') }
+    @{ de = (Join-Path $W   'WorldRadio.dll');     vers = (Join-Path $sc 'WorldRadio.dll') },
+    @{ de = (Join-Path $src 'WorldRadio.ini');     vers = (Join-Path $sc 'WorldRadio.ini') },
+    @{ de = (Join-Path $W   'lib\NAudio.dll'); vers = (Join-Path $sc 'NAudio.dll') }
 )
 foreach ($c in $copies) {
     if (-not (Test-Path -LiteralPath $c.de)) { throw ('source manquante : ' + $c.de) }
@@ -110,7 +134,11 @@ if ($personnels.Count -gt 0) {
     # LastStation n'existe pas dans le .ini livre : on l'ajoute
     if ($personnels.ContainsKey('LastStation') -and
         -not ($lignes | Where-Object { $_.TrimStart().StartsWith('LastStation=') })) {
-        $lignes = @($lignes[0..1]) + @('LastStation=' + $personnels['LastStation']) + @($lignes[2..($lignes.Count-1)])
+        $liste = [System.Collections.Generic.List[string]]$lignes
+        $g = $liste.FindIndex([Predicate[string]]{ param($x) $x.Trim() -eq '[General]' })
+        if ($g -ge 0) { $liste.Insert($g + 1, 'LastStation=' + $personnels['LastStation']) }
+        else { $liste.Add('LastStation=' + $personnels['LastStation']) }
+        $lignes = $liste.ToArray()
         $rendus++
     }
     if ($rendus -gt 0) {
@@ -119,7 +147,7 @@ if ($personnels.Count -gt 0) {
     }
 }
 
-Get-ChildItem -LiteralPath (Join-Path $src 'icons') -Filter '*.png' | ForEach-Object {
+Get-ChildItem -LiteralPath (Join-Path $W 'assets\icons') -Filter '*.png' | ForEach-Object {
     Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $dossierIcones $_.Name) -Force
     Write-Host ('  {0,-20} {1,10:N0} o' -f $_.Name, $_.Length) -ForegroundColor Green
 }
