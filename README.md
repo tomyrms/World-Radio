@@ -128,6 +128,7 @@ réglages sont repris. Laisser les deux ferait jouer deux radios à la fois.
 .\tests\fondu.ps1       # les dix causes de coupure, les rampes, le chien de garde
 .\tests\spectre.ps1     # analyse de fréquence sur un flux réel
 .\tests\niveau.ps1      # corrections de niveau, et limiteur
+.\tests\pieton.ps1      # à pied, aucune radio : ni la nôtre ni celle du jeu
 ```
 
 Ces tests ne vérifient pas que le code compile, mais qu'il fait ce qu'il
