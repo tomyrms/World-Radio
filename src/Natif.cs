@@ -538,10 +538,21 @@ namespace WorldRadio
             catch { }
         }
 
-        /// <summary>Radio du telephone, qui joue aussi a pied.</summary>
-        internal static void RadioMobile(bool active)
+        /// <summary>
+        /// Empeche la radio native de GTA de jouer A PIED.
+        ///
+        /// SET_MOBILE_RADIO_ENABLED_DURING_GAMEPLAY est la native qu'utilisent
+        /// les mods « On-Foot Mobile Radio » : a vrai, la roue des radios de
+        /// GTA s'ouvre a pied. Dans le jeu d'origine, elle est a faux.
+        ///
+        /// L'ancienne version la passait a VRAI en sortant du vehicule, en
+        /// croyant « rendre la radio au jeu ». C'etait l'inverse : elle offrait
+        /// au joueur une radio a pied que le jeu n'a pas. D'ou cette fonction,
+        /// qui ne sait QUE bloquer : impossible de refaire l'erreur.
+        /// </summary>
+        internal static void BloquerRadioAPied()
         {
-            try { Function.Call(Hash.SET_MOBILE_RADIO_ENABLED_DURING_GAMEPLAY, active); }
+            try { Function.Call(Hash.SET_MOBILE_RADIO_ENABLED_DURING_GAMEPLAY, false); }
             catch { }
         }
     }

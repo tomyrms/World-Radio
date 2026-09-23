@@ -89,6 +89,10 @@ namespace WorldRadio
                 // l'ouverture du menu pause
                 Natif.NePasMettreEnPause();
 
+                // L'ancienne version laissait la radio a pied ouverte : on la
+                // referme d'entree, sans attendre la premiere sortie de vehicule.
+                Natif.BloquerRadioAPied();
+
                 KeyDown += SurTouche;
                 Tick += SurTick;
                 Aborted += SurArret;
@@ -122,11 +126,10 @@ namespace WorldRadio
                 // sans que rien n'indique pourquoi.
                 RendreLeTemps();
 
-                if (_handleRadio != 0)
-                {
-                    Natif.AllumerRadioVehicule(_handleRadio);
-                    Natif.RadioMobile(true);
-                }
+                // On rend la radio du VEHICULE, et seulement elle : a pied, le
+                // jeu d'origine n'en a pas, on n'en offre donc pas non plus.
+                if (_handleRadio != 0) Natif.AllumerRadioVehicule(_handleRadio);
+                Natif.BloquerRadioAPied();
                 Journal.Ecrire("--- arret ---");
             }
             catch (Exception ex) { Journal.Erreur("arret", ex); }
@@ -153,6 +156,7 @@ namespace WorldRadio
                 _audio.Rafraichir(!EnVehicule());
 
                 GererRadioJeu();
+                GarderPieton();
                 GererSelecteur();
 
                 // Les niveaux se calculent sur le fil du jeu, a partir du
@@ -285,6 +289,33 @@ namespace WorldRadio
             _apercu.Dessiner(_config, StationCourante(), PaysCourant(), _metadonnees, _spectre);
         }
 
+        /// <summary>
+        /// A pied, aucune radio : ni la notre, ni celle du jeu. C'est le
+        /// comportement d'origine de GTA.
+        ///
+        /// Deux barrieres. La native d'abord, reaffirmee toutes les deux
+        /// secondes : un autre script pourrait la relacher, et une partie
+        /// lancee avec l'ancienne version l'avait laissee ouverte. Puis la
+        /// commande de la roue, neutralisee tant qu'on est a pied : meme si la
+        /// native etait rouverte, la roue ne s'ouvrirait pas.
+        ///
+        /// Neutraliser la commande 85 ne touche qu'elle : Q reste la mise a
+        /// couvert, qui est une autre commande.
+        /// </summary>
+        private int _comptePieton;
+
+        private void GarderPieton()
+        {
+            if (EnVehicule()) { _comptePieton = 0; return; }
+
+            Natif.DesactiverCommande(GTA.Control.VehicleRadioWheel);
+            if (--_comptePieton <= 0)
+            {
+                _comptePieton = 120;
+                Natif.BloquerRadioAPied();
+            }
+        }
+
         private void Annoncer()
         {
             if (_annonceFaite) return;
@@ -323,7 +354,6 @@ namespace WorldRadio
                     {
                         _compteurRadio = 30;
                         Natif.EteindreRadioVehicule(handle);
-                        Natif.RadioMobile(false);
                     }
                     return;
                 }
@@ -331,7 +361,6 @@ namespace WorldRadio
                 if (_handleRadio != 0)
                 {
                     Natif.AllumerRadioVehicule(_handleRadio);
-                    Natif.RadioMobile(true);
                     _handleRadio = 0;
                 }
             }
