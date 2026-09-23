@@ -1,0 +1,66 @@
+WORLD RADIO - radios internet pour GTA V Enhanced
+=================================================
+
+17 vraies radios, en direct, dans 5 pays : France, Suisse, Portugal,
+Espagne, Etats-Unis. Avec l'artiste et le titre en cours.
+
+
+INSTALLATION
+------------
+
+  1. Ferme GTA V.
+  2. Decompresse tout le zip (clic droit > Extraire tout).
+  3. Double-clique sur INSTALLER.cmd
+
+C'est tout. Le script trouve le jeu tout seul, que tu l'aies sur Epic
+Games, Steam ou le launcher Rockstar, quel que soit le disque ou le nom
+du dossier.
+
+S'il ne le trouve vraiment pas, une fenetre s'ouvre : il suffit de
+selectionner GTA5_Enhanced.exe dans le dossier du jeu.
+
+
+IL FAUT AVOIR
+-------------
+
+  Script Hook V              http://www.dev-c.com/gtav/scripthookv/
+  ScriptHookVDotNet          version Enhanced :
+                             https://github.com/scripthookvdotnet/scripthookvdotnet/releases
+
+Si tu as deja d'autres mods, tu les as surement. Le script verifie et te
+dit ce qui manque.
+
+
+EN JEU, AU VOLANT
+-----------------
+
+  Touche radio, appui BREF       eteint / rallume la derniere station
+  Touche radio, MAINTENUE        ouvre la roue des stations
+    (Q au clavier, croix directionnelle gauche a la manette)
+    stick droit / souris         vise une station
+    tout en haut                 RADIO OFF
+    R1 / RB                      pays suivant
+    relacher                     ferme
+
+  F10 / F9                       station suivante / precedente
+  NumPad9 / NumPad3              volume
+
+A pied, pas de radio, comme dans le jeu d'origine.
+
+
+SI CA NE MARCHE PAS
+-------------------
+
+Le script ecrit un journal a cote de lui :
+
+    WorldRadio-installation.log
+
+Envoie ce fichier a celui qui t'a passe le mod : il dit exactement ce qui
+a ete cherche, trouve et copie.
+
+Une fois en jeu, un second journal est ecrit dans le dossier du jeu :
+
+    scripts\WorldRadio.log
+
+Si la radio ne fait aucun son : verifie le curseur "Musique" dans les
+reglages audio de GTA, le mod le suit.

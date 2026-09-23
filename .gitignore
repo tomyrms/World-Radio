@@ -12,3 +12,9 @@ scripts/
 # outil de mesure : compile a la demande
 outils/*.exe
 outils/NAudio.dll
+
+# reference de compilation : incluse, pour compiler sans avoir le jeu
+!lib/ScriptHookVDotNet3.dll
+
+# zip fabrique par build\release.ps1
+dist/

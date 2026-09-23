@@ -1,8 +1,6 @@
 ﻿$ErrorActionPreference = 'Stop'
 # racine du depot, deduite de l'emplacement de ce script
 $W    = Split-Path -Parent $PSScriptRoot
-. (Join-Path $PSScriptRoot 'trouve-jeu.ps1')
-$game = Trouve-Jeu
 $csc  = 'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 $src  = Join-Path $W 'src'
 $out  = Join-Path $W 'WorldRadio.dll'
@@ -31,7 +29,7 @@ if (Test-Path -LiteralPath $out) { Remove-Item -LiteralPath $out -Force }
 
 $args = @(
   '/target:library', "/out:$out", '/nologo', '/optimize+', '/warnaserror-',
-  "/reference:$(Join-Path $game 'ScriptHookVDotNet3.dll')",
+  "/reference:$(Join-Path $W 'lib\ScriptHookVDotNet3.dll')",
   "/reference:$naud",
   '/reference:System.dll', '/reference:System.Core.dll',
   '/reference:System.Drawing.dll', '/reference:System.Windows.Forms.dll'
